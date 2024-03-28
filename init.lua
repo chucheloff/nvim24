@@ -134,7 +134,8 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 vim.opt.relativenumber = true
 
-vim.opt.foldmethod = 'syntax'
+vim.opt.foldmethod = 'indent'
+vim.opt.foldlevelstart = 99
 
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
