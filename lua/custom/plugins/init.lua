@@ -105,40 +105,29 @@ return {
     },
   },
   {
-    'nvim-neo-tree/neo-tree.nvim',
-    branch = 'v3.x',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
-      'MunifTanjim/nui.nvim',
-      -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
-    },
-    view = {
-      width = {
-        padding = 3, -- Adjust this value to change the default tab width
-        min = 20,
-      },
-      -- Other view options...
+    'christoomey/vim-tmux-navigator',
+    cmd = {
+      'TmuxNavigateLeft',
+      'TmuxNavigateDown',
+      'TmuxNavigateUp',
+      'TmuxNavigateRight',
+      'TmuxNavigatePrevious',
     },
     keys = {
-      { '<leader>nt', '<cmd>Neotree toggle<cr>', desc = 'Toggle Neo-tree' },
+      { '<c-h>', '<cmd><C-U>TmuxNavigateLeft<cr>' },
+      { '<c-j>', '<cmd><C-U>TmuxNavigateDown<cr>' },
+      { '<c-k>', '<cmd><C-U>TmuxNavigateUp<cr>' },
+      { '<c-l>', '<cmd><C-U>TmuxNavigateRight<cr>' },
+      { '<c-\\>', '<cmd><C-U>TmuxNavigatePrevious<cr>' },
     },
-    opts = {
-      filesystem = {
-        filtered_items = {
-          visible = true,
-          show_hidden_count = true,
-          hide_dotfiles = false, -- This line ensures hidden files are shown
-          hide_gitignored = false,
-          hide_by_name = {
-            -- Add any specific files you want to hide here
-            -- '.git',
-            -- '.DS_Store',
-            -- 'thumbs.db',
-          },
-          never_show = {},
-        },
-      },
-    },
+  },
+  {
+    'vim-test/vim-test',
+    vim.keymap.set('n', '<leader>t', ':TestNearest<CR>'),
+    vim.keymap.set('n', '<leader>T', ':TestFile<CR>'),
+    vim.keymap.set('n', '<leader>a', ':TestSuite<CR>'),
+    -- This map conflicts with something idk
+    -- vim.keymap.set('n', '<leader>l', ':TestLast<CR>'),
+    vim.keymap.set('n', '<leader>g', ':TestVisit<CR>'),
   },
 }
