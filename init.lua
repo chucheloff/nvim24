@@ -630,6 +630,7 @@ require('lazy').setup({
         isort = {},
         ruff = {},
         debugpy = {},
+
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -813,26 +814,26 @@ require('lazy').setup({
       },
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
-          --  So if you have a snippet that's like:
+          --  so if you have a snippet that's like:
           --  function $name($args)
           --    $body
           --  end
           --
           -- <c-l> will move you to the right of each of the expansion locations.
           -- <c-h> is similar, except moving you backwards.
-          -- ['<C-l>'] = cmp.mapping(function()
+          -- ['<c-l>'] = cmp.mapping(function()
           --   if luasnip.expand_or_locally_jumpable() then
           --     luasnip.expand_or_jump()
           --   end
           -- end, { 'i', 's' }),
-          -- ['<C-h>'] = cmp.mapping(function()
+          -- ['<c-h>'] = cmp.mapping(function()
           --   if luasnip.locally_jumpable(-1) then
           --     luasnip.jump(-1)
           --   end
           -- end, { 'i', 's' }),
 
-          -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
-          --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
+          -- for more advanced luasnip keymaps (e.g. selecting choice nodes, expansion) see:
+          --    https://github.com/l3mon4d3/luasnip?tab=readme-ov-file#keymaps
         },
       },
 
@@ -853,60 +854,72 @@ require('lazy').setup({
   },
   {
     'catppuccin/nvim',
-    -- integrations = {
-    --   cmp = true,
-    --   gitsigns = true,
-    --   nvimtree = true,
-    --   treesitter = true,
-    --   notify = false,
-    --   mini = {
-    --     enabled = true,
-    --     indentscope_color = '',
-    --   },
-    -- },
+    integrations = {
+      cmp = true,
+      gitsigns = true,
+      nvimtree = true,
+      treesitter = true,
+      notify = false,
+      mini = {
+        enabled = true,
+        indentscope_color = '',
+      },
+    },
     priority = 1000,
     name = 'catppuccin',
   },
-  -- { -- You can easily change to a different colorscheme.
-  --   -- Change the name of the colorscheme plugin below, and then
+  -- { -- you can easily change to a different colorscheme.
+  --   -- change the name of the colorscheme plugin below, and then
   --   -- change the command in the config to whatever the name of that colorscheme is.
   --   --
-  --   -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+  --   -- if you want to see what colorschemes are already installed, you can use `:telescope colorscheme`.
   --   'folke/tokyonight.nvim',
-  --   priority = 1000, -- Make sure to load this before all the other start plugins.
+  --   priority = 1000, -- make sure to load this before all the other start plugins.
   --   init = function()
-  --     -- Load the colorscheme here.
-  --     -- Like many other themes, this one has different styles, and you could load
+  --     -- load the colorscheme here.
+  --     -- like many other themes, this one has different styles, and you could load
   --     -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
   --     vim.cmd.colorscheme 'tokyonight-night'
   --
-  --     -- You can configure highlights by doing something like:
-  --     vim.cmd.hi 'Comment gui=none'
+  --     -- you can configure highlights by doing something like:
+  --     vim.cmd.hi 'comment gui=none'
   --   end,
   -- },
 
-  -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  -- highlight todo, notes, etc in comments
+  { 'folke/todo-comments.nvim', event = 'vimenter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
-  { -- Collection of various small independent plugins/modules
+  { -- collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
+    lazy = false,
     config = function()
-      -- Better Around/Inside textobjects
+      -- better around/inside textobjects
       --
-      -- Examples:
-      --  - va)  - [V]isually select [A]round [)]paren
-      --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
-      --  - ci'  - [C]hange [I]nside [']quote
+      -- examples:
+      --  - va)  - [v]isually select [a]round [)]paren
+      --  - yinq - [y]ank [i]nside [n]ext [']quote
+      --  - ci'  - [c]hange [i]nside [']quote
       require('mini.ai').setup { n_lines = 500 }
 
-      -- Add/delete/replace surroundings (brackets, quotes, etc.)
+      -- add/delete/replace surroundings (brackets, quotes, etc.)
       --
-      -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
-      -- - sd'   - [S]urround [D]elete [']quotes
-      -- - sr)'  - [S]urround [R]eplace [)] [']
+      -- - saiw) - [s]urround [a]dd [i]nner [w]ord [)]paren
+      -- - sd'   - [s]urround [d]elete [']quotes
+      -- - sr)'  - [s]urround [r]eplace [)] [']
       require('mini.surround').setup()
 
       require('mini.pairs').setup()
+
+      -- require('mini.files').setup {
+      --   windows = {
+      --     preview = false,
+      --   },
+      --   options = {
+      --     -- Whether to use for editing directories
+      --     -- Disabled by default in LazyVim because neo-tree is used for that
+      --     use_as_default_explorer = true,
+      --   },
+      -- }
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
@@ -926,6 +939,23 @@ require('lazy').setup({
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
+
+    -- keys = {
+    --   {
+    --     '-',
+    --     function()
+    --       require('mini.files').open(vim.api.nvim_buf_get_name(0), true)
+    --     end,
+    --     desc = 'Open mini.files (Directory of Current File)',
+    --   },
+    --   {
+    --     '_',
+    --     function()
+    --       require('mini.files').open(vim.uv.cwd(), true)
+    --     end,
+    --     desc = 'Open mini.files (cwd)',
+    --   },
+    -- },
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
@@ -933,7 +963,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'python', 'bash', 'c', 'html', 'lua', 'markdown', 'vim', 'vimdoc' },
+      ensure_installed = { 'python', 'bash', 'lua', 'markdown', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -941,9 +971,9 @@ require('lazy').setup({
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
+        -- additional_vim_regex_highlighting = { 'ruby' },
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      -- indent = { enable = true, disable = { 'ruby' } },
     },
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:

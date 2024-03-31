@@ -8,7 +8,7 @@ return {
     branch = 'harpoon2',
     dependencies = { 'nvim-lua/plenary.nvim' },
     config = function()
-      require('harpoon'):setup()
+      require('harpoon'):setup {}
       local conf = require('telescope.config').values
       local function toggle_telescope(harpoon_files)
         local file_paths = {}
@@ -103,31 +103,5 @@ return {
     keys = {
       { '<leader>lg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
     },
-  },
-  {
-    'christoomey/vim-tmux-navigator',
-    cmd = {
-      'TmuxNavigateLeft',
-      'TmuxNavigateDown',
-      'TmuxNavigateUp',
-      'TmuxNavigateRight',
-      'TmuxNavigatePrevious',
-    },
-    keys = {
-      { '<c-h>', '<cmd><C-U>TmuxNavigateLeft<cr>' },
-      { '<c-j>', '<cmd><C-U>TmuxNavigateDown<cr>' },
-      { '<c-k>', '<cmd><C-U>TmuxNavigateUp<cr>' },
-      { '<c-l>', '<cmd><C-U>TmuxNavigateRight<cr>' },
-      { '<c-\\>', '<cmd><C-U>TmuxNavigatePrevious<cr>' },
-    },
-  },
-  {
-    'vim-test/vim-test',
-    vim.keymap.set('n', '<leader>t', ':TestNearest<CR>'),
-    vim.keymap.set('n', '<leader>T', ':TestFile<CR>'),
-    vim.keymap.set('n', '<leader>a', ':TestSuite<CR>'),
-    -- This map conflicts with something idk
-    -- vim.keymap.set('n', '<leader>l', ':TestLast<CR>'),
-    vim.keymap.set('n', '<leader>g', ':TestVisit<CR>'),
   },
 }
