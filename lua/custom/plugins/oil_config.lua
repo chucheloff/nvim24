@@ -2,6 +2,7 @@ return {
   {
     'stevearc/oil.nvim',
     enabled = false,
+    lazy = false,
     -- this is mapping a "-" key to open oil from a file
     keys = {
       {
