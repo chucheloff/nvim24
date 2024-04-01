@@ -481,10 +481,10 @@ require('lazy').setup({
         -- clangd = {},
         -- gopls = {},
         pyright = {},
-        black = {},
-        isort = {},
+        -- black = {},
+        -- isort = {},
         ruff = {},
-        debugpy = {},
+        -- debugpy = {},
 
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -561,17 +561,18 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        python = { 'isort', 'black' },
+        -- python = { 'isort', 'black' },
+        python = { 'ruff_fix', 'ruff_format' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
       },
       formatters = {
-        black = {
-          -- Sometimes black wont format without the --fsat prepended tag
-          prepend_args = { '--safe', '--line-length', '80' },
-        },
+        -- black = {
+        --   -- Sometimes black wont format without the --fsat prepended tag
+        --   prepend_args = { '--safe', '--line-length', '80' },
+        -- },
       },
     },
   },
