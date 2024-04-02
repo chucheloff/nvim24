@@ -42,6 +42,9 @@ vim.opt.smartcase = true
 -- Keep signcolumn on by default
 vim.opt.signcolumn = 'yes'
 
+-- display colored column to indicate a preffred file line length
+vim.opt.colorcolumn = '80'
+
 -- Decrease update time
 vim.opt.updatetime = 250
 
@@ -482,7 +485,7 @@ require('lazy').setup({
         -- gopls = {},
         pyright = {},
         -- black = {},
-        -- isort = {},
+        isort = {},
         ruff = {},
         -- debugpy = {},
 
@@ -562,7 +565,8 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         -- python = { 'isort', 'black' },
-        python = { 'ruff_fix', 'ruff_format' },
+        python = { 'isort', 'ruff_fix', 'ruff_format' },
+        csharp = { 'csharpier' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
@@ -612,6 +616,9 @@ require('lazy').setup({
       --  into multiple repos for maintenance purposes.
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
+      'hrsh7th/cmp-nvim-lsp-signature-help',
+      -- Rust only
+      -- 'zjp-CN/nvim-cmp-lsp-rs',
     },
     config = function()
       -- See `:help cmp`
@@ -626,6 +633,13 @@ require('lazy').setup({
           end,
         },
         completion = { completeopt = 'menu,menuone,noinsert' },
+        -- matching = {
+        --   disallow_fuzzy_matching = true,
+        --   disallow_fullfuzzy_matching = true,
+        --   disallow_partial_fuzzy_matching = true,
+        --   disallow_partial_matching = false,
+        --   disallow_prefix_unmatching = true,
+        -- },
 
         -- For an understanding of why these mappings were
         -- chosen, you will need to read `:help ins-completion`
@@ -649,7 +663,7 @@ require('lazy').setup({
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
-          ['<C-Space>'] = cmp.mapping.complete {},
+          -- ['<C-Space>'] = cmp.mapping.complete {},
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
           --  so if you have a snippet that's like:
@@ -672,11 +686,50 @@ require('lazy').setup({
 
           -- for more advanced luasnip keymaps (e.g. selecting choice nodes, expansion) see:
           --    https://github.com/l3mon4d3/luasnip?tab=readme-ov-file#keymaps
+          ['<C-space>'] = cmp.mapping.complete { reason = cmp.ContextReason.Auto },
         },
         sources = {
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
+          { name = 'nvim_lsp_signature_help' },
+          -- { name = 'cmp_lsp_rs' },
+        },
+        sorting = {
+          priority_weight = 3,
+          comparators = {
+            cmp.config.compare.recently_used,
+            cmp.config.compare.locality,
+            cmp.config.compare.offset,
+            cmp.config.compare.exact,
+            cmp.config.compare.score,
+
+            -- copied from cmp-under, but I don't think I need the plugin for this.
+            -- I might add some more of my own.
+            function(entry1, entry2)
+              local _, entry1_under = entry1.completion_item.label:find '^_+'
+              local _, entry2_under = entry2.completion_item.label:find '^_+'
+              entry1_under = entry1_under or 0
+              entry2_under = entry2_under or 0
+              if entry1_under > entry2_under then
+                return false
+              elseif entry1_under < entry2_under then
+                return true
+              end
+            end,
+
+            cmp.config.compare.kind,
+            cmp.config.compare.sort_text,
+            cmp.config.compare.length,
+            cmp.config.compare.order,
+          },
+        },
+        experimental = {
+          -- I like the new menu better! Nice work hrsh7th
+          native_menu = false,
+
+          -- Let's play with this for a day or two
+          ghost_text = false,
         },
       }
     end,
@@ -738,18 +791,6 @@ require('lazy').setup({
       require('mini.surround').setup()
 
       require('mini.pairs').setup()
-
-      -- require('mini.files').setup {
-      --   windows = {
-      --     preview = false,
-      --   },
-      --   options = {
-      --     -- Whether to use for editing directories
-      --     -- Disabled by default in LazyVim because neo-tree is used for that
-      --     use_as_default_explorer = true,
-      --   },
-      -- }
-
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
