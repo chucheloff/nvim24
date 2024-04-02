@@ -45,6 +45,9 @@ vim.o.smartcase = true
 -- Keep signcolumn on by default
 vim.o.signcolumn = 'yes'
 
+-- display colored column to indicate a preffred file line length
+vim.opt.colorcolumn = '80'
+
 -- Decrease update time
 vim.o.updatetime = 250
 
@@ -627,7 +630,7 @@ require('lazy').setup({
         -- gopls = {},
         pyright = {},
         -- black = {},
-        -- isort = {},
+        isort = {},
         ruff = {},
         -- debugpy = {},
 
@@ -724,7 +727,8 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         -- python = { 'isort', 'black' },
-        python = { 'ruff_fix', 'ruff_format' },
+        python = { 'isort', 'ruff_fix', 'ruff_format' },
+        csharp = { 'csharpier' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -769,22 +773,40 @@ require('lazy').setup({
         },
         opts = {},
       },
-      'folke/lazydev.nvim',
+      'saadparwaiz1/cmp_luasnip',
+
+      -- Adds other completion capabilities.
+      --  nvim-cmp does not ship with all sources by default. They are split
+      --  into multiple repos for maintenance purposes.
+      'hrsh7th/cmp-nvim-lsp',
+      'hrsh7th/cmp-path',
+      'hrsh7th/cmp-nvim-lsp-signature-help',
+      -- Rust only
+      -- 'zjp-CN/nvim-cmp-lsp-rs',
     },
-    --- @module 'blink.cmp'
-    --- @type blink.cmp.Config
-    opts = {
-      keymap = {
-        -- 'default' (recommended) for mappings similar to built-in completions
-        --   <c-y> to accept ([y]es) the completion.
-        --    This will auto-import if your LSP supports it.
-        --    This will expand snippets if the LSP sent a snippet.
-        -- 'super-tab' for tab to accept
-        -- 'enter' for enter to accept
-        -- 'none' for no mappings
-        --
-        -- For an understanding of why the 'default' preset is recommended,
-        -- you will need to read `:help ins-completion`
+    config = function()
+      -- See `:help cmp`
+      local cmp = require 'cmp'
+      local luasnip = require 'luasnip'
+      luasnip.config.setup {}
+
+      cmp.setup {
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body)
+          end,
+        },
+        completion = { completeopt = 'menu,menuone,noinsert' },
+        -- matching = {
+        --   disallow_fuzzy_matching = true,
+        --   disallow_fullfuzzy_matching = true,
+        --   disallow_partial_fuzzy_matching = true,
+        --   disallow_partial_matching = false,
+        --   disallow_prefix_unmatching = true,
+        -- },
+
+        -- For an understanding of why these mappings were
+        -- chosen, you will need to read `:help ins-completion`
         --
         -- No, but seriously. Please read `:help ins-completion`, it is really good!
         --
@@ -808,11 +830,10 @@ require('lazy').setup({
         nerd_font_variant = 'mono',
       },
 
-      completion = {
-        -- By default, you may press `<c-space>` to show the documentation.
-        -- Optionally, set `auto_show = true` to show the documentation after a delay.
-        documentation = { auto_show = false, auto_show_delay_ms = 500 },
-      },
+          -- Manually trigger a completion from nvim-cmp.
+          --  Generally you don't need this, because nvim-cmp will display
+          --  completions whenever it has completion options available.
+          -- ['<C-Space>'] = cmp.mapping.complete {},
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
           --  so if you have a snippet that's like:
@@ -835,23 +856,53 @@ require('lazy').setup({
 
           -- for more advanced luasnip keymaps (e.g. selecting choice nodes, expansion) see:
           --    https://github.com/l3mon4d3/luasnip?tab=readme-ov-file#keymaps
+          ['<C-space>'] = cmp.mapping.complete { reason = cmp.ContextReason.Auto },
         },
-      },
+        sources = {
+          { name = 'nvim_lsp' },
+          { name = 'luasnip' },
+          { name = 'path' },
+          { name = 'nvim_lsp_signature_help' },
+          -- { name = 'cmp_lsp_rs' },
+        },
+        sorting = {
+          priority_weight = 3,
+          comparators = {
+            cmp.config.compare.recently_used,
+            cmp.config.compare.locality,
+            cmp.config.compare.offset,
+            cmp.config.compare.exact,
+            cmp.config.compare.score,
 
-      snippets = { preset = 'luasnip' },
+            -- copied from cmp-under, but I don't think I need the plugin for this.
+            -- I might add some more of my own.
+            function(entry1, entry2)
+              local _, entry1_under = entry1.completion_item.label:find '^_+'
+              local _, entry2_under = entry2.completion_item.label:find '^_+'
+              entry1_under = entry1_under or 0
+              entry2_under = entry2_under or 0
+              if entry1_under > entry2_under then
+                return false
+              elseif entry1_under < entry2_under then
+                return true
+              end
+            end,
 
-      -- Blink.cmp includes an optional, recommended rust fuzzy matcher,
-      -- which automatically downloads a prebuilt binary when enabled.
-      --
-      -- By default, we use the Lua implementation instead, but you may enable
-      -- the rust implementation via `'prefer_rust_with_warning'`
-      --
-      -- See :h blink-cmp-config-fuzzy for more information
-      fuzzy = { implementation = 'lua' },
+            cmp.config.compare.kind,
+            cmp.config.compare.sort_text,
+            cmp.config.compare.length,
+            cmp.config.compare.order,
+          },
+        },
+        experimental = {
+          -- I like the new menu better! Nice work hrsh7th
+          native_menu = false,
 
-      -- Shows a signature help window while you type arguments for a function
-      signature = { enabled = true },
-    },
+          -- Let's play with this for a day or two
+          ghost_text = false,
+        },
+      }
+    end,
   },
   {
     'catppuccin/nvim',
@@ -910,18 +961,6 @@ require('lazy').setup({
       require('mini.surround').setup()
 
       require('mini.pairs').setup()
-
-      -- require('mini.files').setup {
-      --   windows = {
-      --     preview = false,
-      --   },
-      --   options = {
-      --     -- Whether to use for editing directories
-      --     -- Disabled by default in LazyVim because neo-tree is used for that
-      --     use_as_default_explorer = true,
-      --   },
-      -- }
-
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
