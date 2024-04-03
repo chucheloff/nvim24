@@ -46,7 +46,7 @@ vim.o.smartcase = true
 vim.o.signcolumn = 'yes'
 
 -- display colored column to indicate a preffred file line length
-vim.opt.colorcolumn = '80'
+vim.opt.colorcolumn = '88'
 
 -- Decrease update time
 vim.o.updatetime = 250
@@ -126,6 +126,11 @@ vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
 vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
 vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+
+-- TIP: Disable arrow keys in normal mode
+-- vim.keymap.set('i', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+-- vim.keymap.set('i', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+-- vim.keymap.set('i', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
