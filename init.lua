@@ -98,6 +98,7 @@ vim.keymap.set('n', '<C-h>', ':wincmd h<CR>')
 vim.keymap.set('n', '<C-j>', ':wincmd j<CR>')
 vim.keymap.set('n', '<C-k>', ':wincmd k<CR>')
 vim.keymap.set('n', '<C-l>', ':wincmd l<CR>')
+vim.keymap.set('n', 's', '')
 
 -- center search
 vim.keymap.set('n', 'n', 'nzzzv')
@@ -553,6 +554,7 @@ require('lazy').setup({
             },
           },
         },
+        experimental,
       }
 
       -- Ensure the servers and tools above are installed
@@ -769,6 +771,9 @@ require('lazy').setup({
             cmp.config.compare.length,
             cmp.config.compare.order,
           },
+        },
+        experimental = {
+          ghost_text = false,
         },
       }
     end,
