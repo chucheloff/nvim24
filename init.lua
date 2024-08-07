@@ -83,7 +83,6 @@ vim.opt.expandtab = true
 vim.opt.smarttab = true
 vim.opt.autoindent = true
 vim.opt.cindent = true
--- vim.opt.filetype = 'indent off'
 
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
@@ -169,6 +168,19 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Format on save
+vim.api.nvim_create_user_command('Format', function(args)
+  local range = nil
+  if args.count ~= -1 then
+    local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
+    range = {
+      start = { args.line1, 0 },
+      ['end'] = { args.line2, end_line:len() },
+    }
+  end
+  require('conform').format { async = true, lsp_format = 'fallback', range = range }
+end, { range = true })
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -194,8 +206,6 @@ rtp:prepend(lazypath)
 --  To update plugins you can run
 --    :Lazy update
 --
---
-
 -- NOTE: Here is where you install your plugins.
 --
 require('lazy').setup({
@@ -256,22 +266,26 @@ require('lazy').setup({
   -- Then, because we use the `opts` key (recommended), the configuration runs
   -- after the plugin has been loaded as `require(MODULE).setup(opts)`.
 
-  -- { -- Useful plugin to show you pending keybinds.
-  --   'folke/which-key.nvim',
-  --   event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-  --   config = function() -- This is the function that runs, AFTER loading
-  --     require('which-key').setup()
-  --
-  --     -- Document existing key chains
-  --     require('which-key').register {
-  --       ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-  --       ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-  --       ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-  --       ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-  --       ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-  --     }
-  --   end,
-  -- },
+  { -- Useful plugin to show you pending keybinds.
+    'folke/which-key.nvim',
+    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
+    -- Document existing key chains
+    keys = {
+      { '<leader>c', group = '[C]ode' },
+      { '<leader>c_', hidden = true },
+      { '<leader>d', group = '[D]ocument' },
+      { '<leader>d_', hidden = true },
+      { '<leader>r', group = '[R]ename' },
+      { '<leader>r_', hidden = true },
+      { '<leader>s', group = '[S]earch' },
+      { '<leader>s_', hidden = true },
+      { '<leader>w', group = '[W]orkspace' },
+      { '<leader>w_', hidden = true },
+    },
+    config = function() -- This is the function that runs, AFTER loading
+      require('which-key').setup()
+    end,
+  },
 
   -- NOTE: Plugins can specify dependencies.
   --
@@ -284,7 +298,7 @@ require('lazy').setup({
     'nvim-telescope/telescope.nvim',
     lazy = true,
     event = 'VimEnter',
-    branch = '0.1.x',
+    -- branch = '0.1.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
       { -- If encountering errors, see telescope-fzf-native README for installation instructions
@@ -609,10 +623,24 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        pyright = {},
-        -- black = {},
-        ruff = {},
+        pyright = {
+          settings = {
+            pyright = {
+              disableOrganizeImports = true, -- Using Ruff
+            },
+            python = {
+              analysis = {
+                -- ignore = { '*' }, -- Using Ruff
+                -- typeCheckingMode = 'off', -- Using mypy
+              },
+            },
+          },
+        },
+
+        -- mypy = {},
+        -- ruff = {},
         -- debugpy = {},
+        dockerls = {},
 
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -692,7 +720,7 @@ require('lazy').setup({
     },
     opts = {
       -- log_level = vim.log.levels.DEBUG,
-      notify_on_error = false,
+      notify_on_error = true,
       format_on_save = function(bufnr)
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
@@ -705,14 +733,22 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        html = { 'htmlbeautifier' },
+        css = { 'stylelint' },
         -- Conform can also run multiple formatters sequentially
         -- python = { 'isort', 'black' },
         python = { 'ruff_fix', 'ruff_format' },
         -- csharp = { 'csharpier' },
-        --
+
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        -- javascript = { { 'prettierd', 'prettier' } },
+        javascript = { 'prettierd', 'prettier' },
+        typescript = { 'prettierd', 'prettier' },
+        -- Use the "*" filetype to run formatters on all filetypes.
+        ['*'] = { 'codespell' },
+        -- Use the "_" filetype to run formatters on filetypes that don't
+        -- have other formatters configured.
+        ['_'] = { 'trim_whitespace' },
       },
       formatters = {
         -- black = {
@@ -745,25 +781,21 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
         opts = {},
       },
       'saadparwaiz1/cmp_luasnip',
-      --
-      -- Adds other completion capabilities.
-      --  nvim-cmp does not ship with all sources by default. They are split
-      --  into multiple repos for maintenance purposes.
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
       'hrsh7th/cmp-nvim-lsp-signature-help',
       -- Rust only
-      -- 'zjp-CN/nvim-cmp-lsp-rs',
+      'zjp-CN/nvim-cmp-lsp-rs',
     },
     config = function()
       -- See `:help cmp`
@@ -778,13 +810,14 @@ require('lazy').setup({
           end,
         },
         completion = { completeopt = 'menu,menuone,noinsert' },
-        -- matching = {
-        --   disallow_fuzzy_matching = true,
-        --   disallow_fullfuzzy_matching = true,
-        --   disallow_partial_fuzzy_matching = true,
-        --   disallow_partial_matching = false,
-        --   disallow_prefix_unmatching = true,
-        -- },
+        matching = {
+          disallow_fuzzy_matching = true,
+          disallow_fullfuzzy_matching = true,
+          disallow_partial_fuzzy_matching = true,
+          disallow_partial_matching = false,
+          disallow_prefix_unmatching = true,
+          disallow_symbol_nonprefix_matching = true,
+        },
 
         -- For an understanding of why these mappings were
         -- chosen, you will need to read `:help ins-completion`
@@ -844,7 +877,8 @@ require('lazy').setup({
           { name = 'luasnip' },
           { name = 'path' },
           { name = 'nvim_lsp_signature_help' },
-          -- { name = 'cmp_lsp_rs' },
+          { name = 'buffer' },
+          { name = 'cmp_lsp_rs' },
         },
         sorting = {
           priority_weight = 3,
@@ -875,13 +909,6 @@ require('lazy').setup({
             cmp.config.compare.order,
           },
         },
-        experimental = {
-          -- I like the new menu better! Nice work hrsh7th
-          native_menu = false,
-
-          -- Let's play with this for a day or two
-          ghost_text = false,
-        },
       }
     end,
   },
@@ -906,26 +933,9 @@ require('lazy').setup({
       require('catppuccin').setup(opts)
     end,
   },
-  -- { -- you can easily change to a different colorscheme.
-  --   -- change the name of the colorscheme plugin below, and then
-  --   -- change the command in the config to whatever the name of that colorscheme is.
-  --   --
-  --   -- if you want to see what colorschemes are already installed, you can use `:telescope colorscheme`.
-  --   'folke/tokyonight.nvim',
-  --   priority = 1000, -- make sure to load this before all the other start plugins.
-  --   init = function()
-  --     -- load the colorscheme here.
-  --     -- like many other themes, this one has different styles, and you could load
-  --     -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-  --     vim.cmd.colorscheme 'tokyonight-night'
-  --
-  --     -- you can configure highlights by doing something like:
-  --     vim.cmd.hi 'comment gui=none'
-  --   end,
-  -- },
 
   -- highlight todo, notes, etc in comments
-  -- { 'folke/todo-comments.nvim', lazy = true, event = 'vimenter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  { 'folke/todo-comments.nvim', lazy = true, event = 'vimenter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
   { -- collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
@@ -947,12 +957,14 @@ require('lazy').setup({
       require('mini.surround').setup()
 
       require('mini.pairs').setup()
+
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
       -- local statusline = require 'mini.statusline'
       -- set use_icons to true if you have a Nerd Font
       -- statusline.setup { use_icons = vim.g.have_nerd_font }
+      -- statusline.setup { use_icons = false }
 
       -- You can configure sections in the statusline by overriding their
       -- default behavior. For example, here we set the section for
@@ -986,7 +998,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'dockerfile', 'toml', 'json', 'python', 'vimdoc' },
+      ensure_installed = { 'dockerfile', 'toml', 'json', 'python', 'vimdoc', 'html' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -996,7 +1008,7 @@ require('lazy').setup({
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         -- additional_vim_regex_highlighting = { 'dockerfile' },
       },
-      -- indent = { enable = true, disable = { 'ruby' } },
+      indent = { enable = true, disable = { 'ruby' } },
     },
     config = function(_, opts)
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
@@ -1021,11 +1033,8 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.lint',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
@@ -1063,8 +1072,8 @@ require('lazy').setup({
     },
     rtp = {
       disabled_plugins = {
-        -- "matchit",
-        -- "matchparen",
+        -- 'matchit',
+        -- 'matchparen',
         'netrwPlugin',
         'gzip',
         'tarPlugin',
