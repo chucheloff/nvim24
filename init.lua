@@ -61,7 +61,7 @@ vim.opt.splitbelow = true
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
-vim.opt.list = true
+vim.opt.list = false
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 vim.opt.relativenumber = true
@@ -510,7 +510,7 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         -- clangd = {},
-        -- gopls = {},
+        gopls = {},
         pyright = {
           settings = {
             pyright = {
@@ -554,7 +554,6 @@ require('lazy').setup({
             },
           },
         },
-        experimental,
       }
 
       -- Ensure the servers and tools above are installed
