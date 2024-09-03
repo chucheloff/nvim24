@@ -109,6 +109,9 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagn
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+local neogen_opts = { noremap = true, silent = true }
+vim.keymap.set('n', '<Leader>nf', ":lua require('neogen').generate()<CR>", neogen_opts)
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -131,6 +134,7 @@ vim.keymap.set('n', '<M-k>', ':m .-2<CR>==')
 vim.keymap.set('v', '<M-j>', ":m '>+1<CR>gv=gv")
 vim.keymap.set('v', '<M-k>', ":m '<-2<CR>gv=gv")
 
+-- Generate comment for current line
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -308,11 +312,18 @@ require('lazy').setup({
         --  All the info you're looking for is in `:help telescope.setup()`
         --
         -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+        --   file_ignore_patterns = {
+        --     'node_modules/.*',
+        --     'venv/.*',
         --   },
         -- },
-        -- pickers = {}
+        -- pickers = {
+        -- find_files = {
+        -- hidden = true,
+        -- no_ignore = true,
+        -- no_ignore_parent = true,
+        -- },
+        -- },
         -- defaults = {
         --   mappings = {
         --     i = {
@@ -623,7 +634,7 @@ require('lazy').setup({
       },
       formatters = {
         -- black = {
-        --   -- Sometimes black wont format without the --fsat prepended tag
+        --   -- Sometimes black won't format without the --fsat prepended tag
         --   prepend_args = { '--safe', '--line-length', '80' },
         -- },
       },
@@ -780,7 +791,7 @@ require('lazy').setup({
   {
     'catppuccin/nvim',
     opts = {
-      ntegrations = {
+      integrations = {
         cmp = true,
         gitsigns = true,
         nvimtree = true,
@@ -896,8 +907,8 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  require 'kickstart.plugins.debug',
-  require 'kickstart.plugins.lint',
+  -- require 'kickstart.plugins.debug',
+  -- require 'kickstart.plugins.lint',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
