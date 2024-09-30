@@ -1,0 +1,26 @@
+return {}
+-- return {
+--   'pmizio/typescript-tools.nvim',
+--   dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+--   opts = {},
+--   -- config = function()
+--   --   require('typescript-tools').setup {
+--   --     settings = {
+--   --       -- spawn additional tsserver instance to calculate diagnostics on it
+--   --       separate_diagnostic_server = true,
+--   --       publish_diagnostic_on = 'insert_leave',
+--   --       complete_function_calls = true,
+--   --       include_completions_with_insert_text = true,
+--   --       -- possible values: ("off"|"all"|"implementations_only"|"references_only")
+--   --       code_lens = 'all',
+--   --       disable_member_code_lens = true,
+--   --       -- WARNING: it is disabled by default (maybe you configuration or distro already uses nvim-ts-autotag,
+--   --       -- that maybe have a conflict if enable this feature. )
+--   --       jsx_close_tag = {
+--   --         enable = false,
+--   --         filetypes = { 'javascriptreact', 'typescriptreact' },
+--   --       },
+--   --     },
+--   --   }
+--   -- end,
+-- }
