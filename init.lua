@@ -558,9 +558,10 @@ require('lazy').setup({
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
+        -- typescript_tools = {},
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        tsserver = {},
+        ts_ls = {},
         --
 
         lua_ls = {
@@ -573,7 +574,7 @@ require('lazy').setup({
                 callSnippet = 'Replace',
               },
               -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-              -- diagnostics = { disable = { 'missing-fields' } },
+              diagnostics = { disable = { 'missing-fields' } },
             },
           },
         },
@@ -636,10 +637,13 @@ require('lazy').setup({
 
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        javascript = { 'prettierd', 'prettier' },
-        typescript = { 'prettierd', 'prettier' },
+        javascript = { { 'prettier', 'prettierd', 'codespell', 'trim_whitespace' } },
+        typescript = { { 'prettier', 'prettierd', 'codespell', 'trim_whitespace' } },
+        -- javascript = { 'typescript-tools' },
+        -- typescript = { 'typescript-tools' },
         -- Use the "*" filetype to run formatters on all filetypes.
-        ['*'] = { 'codespell' },
+        ['*'] = { 'codespell', 'trim_whitespace' },
+        -- ['*'] = { 'codespell', 'trim_whitespace' },
         -- Use the "_" filetype to run formatters on filetypes that don't
         -- have other formatters configured.
         ['_'] = { 'trim_whitespace' },
