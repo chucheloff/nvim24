@@ -106,7 +106,8 @@ vim.keymap.set('n', '<C-j>', ':wincmd j<CR>')
 vim.keymap.set('n', '<C-k>', ':wincmd k<CR>')
 vim.keymap.set('n', '<C-l>', ':wincmd l<CR>')
 vim.keymap.set('n', 's', '')
-
+vim.keymap.set('n', '<C-d>', '<C-d>zz', { desc = 'Center cursor after moving down half-page' })
+vim.keymap.set('n', '<C-u>', '<C-u>zz', { desc = 'Center cursor after moving up half-page' })
 -- center search
 vim.keymap.set('n', 'n', 'nzzzv')
 vim.keymap.set('n', 'N', 'Nzzzv')
@@ -138,21 +139,9 @@ vim.keymap.set('n', '<M-k>', ':m .-2<CR>==')
 vim.keymap.set('v', '<M-j>', ":m '>+1<CR>gv=gv")
 vim.keymap.set('v', '<M-k>', ":m '<-2<CR>gv=gv")
 
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---
---  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.diagnostic.config { virtual_text = true }
 
--- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
--- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
--- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
--- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
--- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
-
+-- Generate comment for current line
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -447,7 +436,6 @@ require('lazy').setup({
       -- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
       -- used for completion, annotations and signatures of Neovim apis
       { 'folke/neodev.nvim', lazy = true, opts = { lazy = true } },
-      'saghen/blink.cmp',
     },
     config = function()
       -- Brief aside: **What is LSP?**
@@ -571,18 +559,20 @@ require('lazy').setup({
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          -- if client and client.server_capabilities.documentHighlightProvider then
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-            local highlight_group = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
+          if client then
+            if client:supports_method 'textDocument/completion' then
+              vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = false })
+            end
+          end
+          if client and client.server_capabilities.documentHighlightProvider then
+            -- if client and client.server_capabilities.documentFormattingProvider and client.server_capabilities.documentHighlightProvider then
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
-              group = highlight_group,
               callback = vim.lsp.buf.document_highlight,
             })
 
             vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
               buffer = event.buf,
-              group = highlight_group,
               callback = vim.lsp.buf.clear_references,
             })
 
@@ -641,7 +631,6 @@ require('lazy').setup({
       --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
       --  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
       local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = require('blink.cmp').get_lsp_capabilities(capabilities)
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
       -- Enable the following language servers
@@ -683,67 +672,9 @@ require('lazy').setup({
         -- typescript_tools = {},
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
+        ts_ls = {},
         --
-        volar = {
-          -- 'vue',
-          init_options = {
-            vue = {
-              hybridMode = false,
-            },
-          },
-          settings = {
-            typescript = {
-              inlayHints = {
-                enumMemberValues = {
-                  enabled = true,
-                },
-                functionLikeReturnTypes = {
-                  enabled = true,
-                },
-                propertyDeclarationTypes = {
-                  enabled = true,
-                },
-                parameterTypes = {
-                  enabled = true,
-                  supressWhenArgumentMatchesName = true,
-                },
-                variableTypes = {
-                  enabled = true,
-                },
-              },
-            },
-          },
-        },
-        -- ts_ls = {},
-        -- TypeScript
-        ts_ls = {
-          init_options = {
-            plugins = {
-              {
-                name = '@vue/typescript-plugin',
-                location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
-                languages = { 'vue' },
-              },
-            },
-          },
-          settings = {
-            typescript = {
-              tsserver = {
-                useSyntaxServer = false,
-              },
-              inlayHints = {
-                includeInlayParameterNameHints = 'all',
-                includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = true,
-                includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              },
-            },
-          },
-        },
+
         lua_ls = {
           -- cmd = { ... },
           -- filetypes = { ... },
@@ -817,7 +748,7 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { py = false }
+        local disable_filetypes = { c = true, cpp = true, py = false }
         return {
           timeout_ms = 1000,
           lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
@@ -828,15 +759,16 @@ require('lazy').setup({
         html = { 'htmlbeautifier' },
         css = { 'stylelint' },
         -- Conform can also run multiple formatters sequentially
+        -- python = { 'isort', 'black' },
         python = { 'ruff_fix', 'ruff_format' },
         -- csharp = { 'csharpier' },
-        javascript = { 'prettierd' },
-        typescript = { 'prettierd' },
-        vue = { 'prettierd' },
-        json = { 'prettierd' },
 
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
+        -- javascript = { { 'prettier', 'prettierd', 'codespell', 'trim_whitespace' } },
+        -- typescript = { { 'prettier', 'prettierd', 'codespell', 'trim_whitespace' } },
+        -- javascript = { 'typescript-tools' },
+        -- typescript = { 'typescript-tools' },
         -- Use the "*" filetype to run formatters on all filetypes.
         -- ['*'] = { 'codespell', 'trim_whitespace' },
         ['*'] = { 'trim_whitespace' },
@@ -1042,7 +974,7 @@ require('lazy').setup({
       -- better around/inside textobjects
       --
       -- examples:
-      --  - va)  - [v]isually select [a]round ([)])paren
+      --  - va)  - [v]isually select [a]round [)]paren
       --  - yinq - [y]ank [i]nside [n]ext [']quote
       --  - ci'  - [c]hange [i]nside [']quote
       require('mini.ai').setup { n_lines = 500 }
@@ -1051,7 +983,7 @@ require('lazy').setup({
       --
       -- - saiw) - [s]urround [a]dd [i]nner [w]ord [)]paren
       -- - sd'   - [s]urround [d]elete [']quotes
-      -- - sr)'  - [s]urround [ r ]eplace [)] [']
+      -- - sr)'  - [s]urround [r]eplace [)] [']
       require('mini.surround').setup()
 
       require('mini.pairs').setup()
