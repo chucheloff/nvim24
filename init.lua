@@ -140,8 +140,10 @@ vim.keymap.set('v', '<M-j>', ":m '>+1<CR>gv=gv")
 vim.keymap.set('v', '<M-k>', ":m '<-2<CR>gv=gv")
 
 vim.diagnostic.config { virtual_text = true }
+-- vim.diagnostic.config { virtual_text = { current_line = true } }
 
 -- Generate comment for current line
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -559,11 +561,11 @@ require('lazy').setup({
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client then
-            if client:supports_method 'textDocument/completion' then
-              vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = false })
-            end
-          end
+          -- if client then
+          --   if client:supports_method 'textDocument/completion' then
+          --     vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = false })
+          --   end
+          -- end
           if client and client.server_capabilities.documentHighlightProvider then
             -- if client and client.server_capabilities.documentFormattingProvider and client.server_capabilities.documentHighlightProvider then
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
