@@ -23,6 +23,7 @@ vim.opt.mouse = 'a'
 
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
+vim.opt.laststatus = 2
 
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
@@ -405,35 +406,6 @@ require('lazy').setup({
       { 'folke/neodev.nvim', lazy = true, opts = { lazy = true } },
     },
     config = function()
-      -- Brief aside: **What is LSP?**
-      --
-      -- LSP is an initialism you've probably heard, but might not understand what it is.
-      --
-      -- LSP stands for Language Server Protocol. It's a protocol that helps editors
-      -- and language tooling communicate in a standardized fashion.
-      --
-      -- In general, you have a "server" which is some tool built to understand a particular
-      -- language (such as `gopls`, `lua_ls`, `rust_analyzer`, etc.). These Language Servers
-      -- (sometimes called LSP servers, but that's kind of like ATM Machine) are standalone
-      -- processes that communicate with some "client" - in this case, Neovim!
-      --
-      -- LSP provides Neovim with features like:
-      --  - Go to definition
-      --  - Find references
-      --  - Autocompletion
-      --  - Symbol Search
-      --  - and more!
-      --
-      -- Thus, Language Servers are external tools that must be installed separately from
-      -- Neovim. This is where `mason` and related plugins come into play.
-      --
-      -- If you're wondering about lsp vs treesitter, you can check out the wonderfully
-      -- and elegantly composed help section, `:help lsp-vs-treesitter`
-
-      --  This function gets run when an LSP attaches to a particular buffer.
-      --    That is to say, every time a new file is opened that is associated with
-      --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
-      --    function will be executed to configure the current buffer
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
@@ -560,20 +532,7 @@ require('lazy').setup({
 
         -- mypy = {},
         -- ruff = {},
-        -- debugpy = {},
         dockerls = {},
-
-        -- rust_analyzer = {},
-        -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        -- typescript_tools = {},
-        --
-        -- But for many setups, the LSP (`tsserver`) will work just fine
-        ts_ls = {},
-        --
-
         lua_ls = {
           -- cmd = {...},
           -- filetypes = { ...},
@@ -618,6 +577,8 @@ require('lazy').setup({
           end,
         },
       }
+      vim.lsp.config('*', {})
+      vim.lsp.enable { 'ruff' }
     end,
   },
 
@@ -642,7 +603,7 @@ require('lazy').setup({
         css = { 'stylelint' },
         -- Conform can also run multiple formatters sequentially
         -- python = { 'isort', 'black' },
-        python = { 'ruff_fix', 'ruff_format' },
+        python = { 'ruff_organize_imports', 'ruff_fix', 'ruff_format' },
         -- csharp = { 'csharpier' },
 
         -- You can use a sub-list to tell conform to run *until* a formatter
@@ -818,6 +779,24 @@ require('lazy').setup({
   {
     'catppuccin/nvim',
     opts = {
+      styles = { -- Handles the styles of general hi groups (see `:h highlight-args`):
+        comments = { 'italic' }, -- Change the style of comments
+        conditionals = { 'italic' },
+        -- conditionals = { 'regular' },
+        loops = {},
+        functions = {},
+        keywords = {},
+        strings = {},
+        variables = {},
+        numbers = {},
+        booleans = {},
+        properties = {},
+        types = {},
+        operators = {},
+        miscs = {}, -- Uncomment to turn off hard-coded styles
+      },
+      -- no_italic = true,
+      default_integrations = true,
       integrations = {
         cmp = true,
         gitsigns = true,
@@ -988,5 +967,7 @@ require('lazy').setup({
 })
 
 vim.cmd.colorscheme 'catppuccin-mocha'
+-- vim.cmd.colorscheme 'dracula'
+-- vim.o.termguicolors = true
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
