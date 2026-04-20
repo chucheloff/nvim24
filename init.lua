@@ -404,7 +404,7 @@ require('lazy').setup({
             },
           },
         },
-        -- ruff = {},
+        ruff = {},
         dockerls = {},
         lua_ls = {
           settings = {
@@ -425,7 +425,7 @@ require('lazy').setup({
 
       require('mason-lspconfig').setup {
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
-        automatic_installation = false,
+        automatic_installation = true,
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
@@ -470,6 +470,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         html = { 'htmlbeautifier' },
+        toml = { 'tombi' },
         css = { 'stylelint' },
         python = { 'ruff_fix', 'ruff_format' },
         -- Conform can also run multiple formatters sequentially
@@ -639,7 +640,7 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
+    main = 'nvim-treesitter.config', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
       ensure_installed = {
@@ -703,6 +704,7 @@ require('lazy').setup({
       disabled_plugins = {
         -- 'matchit',
         -- 'matchparen',
+        'netrw',
         'netrwPlugin',
         'gzip',
         'tarPlugin',
